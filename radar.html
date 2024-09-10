@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>rafk-radar</title>
+</head>
+<body style="background-color: black; height: 100vh;width: 100vw; margin: 0">
+
+<div id="container"
+     style="margin-top: auto; margin-bottom: auto;  position: relative;top: 50%;transform: translateY(-50%);">
+    <div id="radar_beam" style="width: 10px; height: 50%; background-color: #00ed00; position: absolute;
+                            left: 0; right: 0; margin-left: auto; margin-right: auto;
+                            box-shadow: 0px 0px 40px 20px #00ed00;">
+
+    </div>
+    <div id="targets"></div>
+    <div id="svg_container" style="width: fit-content; height: fit-content; margin-left: auto; margin-right: auto">
+
+    </div>
+</div>
+
+
+</body>
+
+<script>
+    let beam_deg = 0;
+    const UPDATE_TIME = 10000;
+    const UPDATE_RATE = 30;
+    let last_update = 0;
+    let added_targets = [];
+    let svg_size = 500;
+
+    async function loadSvg() {
+        const response = await fetch("/radar.svg");
+        const data = await response.text();
+        document.getElementById("svg_container").innerHTML += data
+        scale()
+        let svg_height = document.getElementById("svg20").getBoundingClientRect();
+        document.getElementById("radar_beam").style.height = `${svg_height.height * 0.5}px`
+    }
+
+    function scale() {
+        let svg = document.getElementById("svg20");
+
+        if (document.documentElement.clientHeight > document.documentElement.clientWidth) {
+            svg_size = document.documentElement.clientWidth;
+        } else {
+            svg_size = document.documentElement.clientHeight
+        }
+        svg.style.width = `${svg_size}px`
+        svg.style.height = `${svg_size}px`
+    }
+
+
+    let beam = document.getElementById("radar_beam")
+    let targets = document.getElementById("targets")
+
+    async function tick() {
+
+        beam.style.transformOrigin = `bottom center`
+        beam.style.transform = `rotate(${beam_deg}deg)`
+        beam_deg = (beam_deg + 5) % 360
+        last_update += UPDATE_RATE
+        if (last_update > UPDATE_TIME) {
+            last_update = 0;
+            await updateTargets()
+        }
+        for (let i = 0; i < added_targets.length; i++) {
+            if (beam_deg-90 < added_targets[i].degrees && beam_deg-85 >= added_targets[i].degrees) {
+                console.log(added_targets[i].id)
+                let el = document.getElementById(added_targets[i].elementId);
+                if (el.classList.contains("hidden")){
+                    el.classList.remove("hidden")
+                }
+                setTimeout(() => {
+                    el.classList.add("hidden")
+                }, 30);
+
+            }
+        }
+
+        setTimeout(() => {
+            requestAnimationFrame(tick)
+        }, UPDATE_RATE);
+    }
+
+    async function updateTargets() {
+        console.log("UPDATING TARGETS")
+        const response = await fetch("/info");
+        const data = await response.json();
+        console.log(data)
+        for (let i = 0; i < data.targets.length; i++) {
+            if (!added_targets.some(e => e.id === data.targets[i].id)) {
+                let calculated_x = svg_size / 2 + (data.targets[i].position.x/1000*svg_size);
+                let calculated_y = svg_size / 2 + (data.targets[i].position.y/1000*svg_size) * -1;
+                let angle = Math.atan2(data.targets[i].position.y, data.targets[i].position.x);   //radians
+                // you need to devide by PI, and MULTIPLY by 180:
+                let degrees = (360+Math.round(180*angle/Math.PI))%360;  //degrees
+
+                data.targets[i].calculated_x = calculated_x;
+                data.targets[i].calculated_y = calculated_y;
+                data.targets[i].degrees = degrees;
+                data.targets[i].elementId = `target${data.targets[i].id}`;
+
+                added_targets.push(data.targets[i])
+                targets.innerHTML += `
+                 <span id="${data.targets[i].elementId}" class="shadow"
+                 style="border-radius: 50%;background-color: #00ed00;position: absolute; left: ${calculated_x}px;top: ${calculated_y}px; width: ${data.targets[i].size}px; height: ${data.targets[i].size}px; transform: translate(-50%, -50%)"
+                 height="100" width="100" />
+                </span>
+                `
+            }
+        }
+    }
+
+    loadSvg()
+    updateTargets()
+    tick()
+</script>
+<style>
+    #radar_beam {
+        /*-webkit-transition: all 0.5s ease-in-out;*/
+        /*-moz-transition: all 0.5s ease-in-out;*/
+        /*-o-transition: all 0.5s ease-in-out;*/
+        /*transition: all 0.5s ease-in-out;*/
+    }
+    .hidden {
+        visibility: hidden;
+        opacity: 0;
+        transition: visibility 0s 2s, opacity 2s linear;
+    }
+    .shadow {
+        box-shadow: 0px 0px 40px 20px #00ed00;
+    }
+</style>
+</html>

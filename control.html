@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>radar-control</title>
+</head>
+<body>
+add target (1000x1000 size):
+<div>
+    <input type="number" placeholder="x_pos" id="x_pos">
+    <input type="number" placeholder="y_pos" id="y_pos">
+    <input type="number" placeholder="size" id="size">
+    <p onclick="addTarget()"
+       style="background-color: cornflowerblue; width: fit-content; padding: 5px; cursor: pointer">ADD</p>
+</div>
+targets:
+<div id="targets">
+
+</div>
+</body>
+<script>
+    async function addTarget(e) {
+        let x_pos = document.getElementById("x_pos").value
+        let y_pos = document.getElementById("y_pos").value
+        let size = document.getElementById("size").value
+        await fetch(`/add_target?pos_x=${x_pos}&pos_y=${y_pos}&size=${size}`)
+    }
+
+    async function getTargets() {
+        const response = await fetch("/info");
+        const data = await response.json();
+        let targets_html = ""
+        for (let i = 0; i < data.targets.length; i++) {
+            targets_html += `<p>ID: ${data.targets[i].id}, POS_X: ${data.targets[i].position.x},
+            POS_Y: ${data.targets[i].position.y}, SIZE: ${data.targets[i].size}
+            <span onclick=deleteTarget(${data.targets[i].id})
+            style="margin-left: 10px; background-color: darkred; color: white; cursor: pointer">DELETE</span></p>`
+        }
+        document.getElementById("targets").innerHTML = targets_html
+    }
+
+    async function deleteTarget(id) {
+        fetch(`/remove_target?id=${id}`)
+    }
+
+    getTargets()
+</script>
+</html>
