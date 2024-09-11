@@ -65,10 +65,19 @@
             last_update = 0;
             await updateTargets()
         }
+        let converted_beam_deg = (360+Math.round(90-beam_deg))%360
+
         for (let i = 0; i < added_targets.length; i++) {
-            if (beam_deg-90 < added_targets[i].degrees && beam_deg-85 >= added_targets[i].degrees) {
+            if (converted_beam_deg <= added_targets[i].degrees && converted_beam_deg + 5 >= added_targets[i].degrees) {
                 console.log(added_targets[i].id)
-                let el = document.getElementById(added_targets[i].elementId);
+                let el;
+                if (added_targets[i]["element"]){
+                    el = added_targets[i]["element"];
+                } else {
+                    el = document.getElementById(added_targets[i].elementId)
+                    added_targets[i]["element"] = el;
+                }
+
                 if (el.classList.contains("hidden")){
                     el.classList.remove("hidden")
                 }
@@ -96,7 +105,7 @@
                 let angle = Math.atan2(data.targets[i].position.y, data.targets[i].position.x);   //radians
                 // you need to devide by PI, and MULTIPLY by 180:
                 let degrees = (360+Math.round(180*angle/Math.PI))%360;  //degrees
-
+                console.log("targetdegree: ", degrees)
                 data.targets[i].calculated_x = calculated_x;
                 data.targets[i].calculated_y = calculated_y;
                 data.targets[i].degrees = degrees;
