@@ -100,8 +100,8 @@
         console.log(data)
         for (let i = 0; i < data.targets.length; i++) {
             if (!added_targets.some(e => e.id === data.targets[i].id)) {
-                let calculated_x = svg_size / 2 + (data.targets[i].position.x/1000*svg_size);
-                let calculated_y = svg_size / 2 + (data.targets[i].position.y/1000*svg_size) * -1;
+                let calculated_x = (data.targets[i].position.x/1000*svg_size);
+                let calculated_y = (data.targets[i].position.y/1000*svg_size) * -1;
                 let angle = Math.atan2(data.targets[i].position.y, data.targets[i].position.x);   //radians
                 // you need to devide by PI, and MULTIPLY by 180:
                 let degrees = (360+Math.round(180*angle/Math.PI))%360;  //degrees
@@ -114,7 +114,7 @@
                 added_targets.push(data.targets[i])
                 targets.innerHTML += `
                  <span id="${data.targets[i].elementId}" class="shadow"
-                 style="border-radius: 50%;background-color: #00ed00;position: absolute; left: ${calculated_x}px;top: ${calculated_y}px; width: ${data.targets[i].size}px; height: ${data.targets[i].size}px; transform: translate(-50%, -50%)"
+                 style="border-radius: 50%;background-color: #00ed00;position: absolute; left: 0px;right: 0px; margin: auto; top: 0px;bottom: 0px; width: ${data.targets[i].size}px; height: ${data.targets[i].size}px; transform: translate(${calculated_x}px, ${calculated_y}px)"
                  height="100" width="100" />
                 </span>
                 `
