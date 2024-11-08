@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Warning</title>
+  <style>
+    /* Make the background black */
+    body {
+      background-color: black;
+      color: red;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Center the warning text */
+    .warning {
+      font-size: 4em;
+      font-weight: bold;
+      animation: flash 1.5s infinite;
+    }
+
+    /* Flashing effect */
+    @keyframes flash {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="warning">
+  <p style="text-align: center">WARNING</p>
+  <p style="text-align: center">NYOMTATÁS SZÜKSÉGES!</p>
+</div>
+</body>
+</html>

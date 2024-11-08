@@ -13,6 +13,8 @@ async def startup_event():
         app.controlhtml = htm.read()
     with open("radar.svg", "r") as svg:
         app.radarsvg = svg.read()
+    with open("warning.html", "r", encoding="utf-8") as html:
+        app.warninghtml = html.read()
     app.radar = {
         "size":
             {
@@ -40,6 +42,10 @@ async def root():
 @app.get("/control")
 async def control():
     return HTMLResponse(content=app.controlhtml, status_code=200)
+
+@app.get("/warning")
+async def control():
+    return HTMLResponse(content=app.warninghtml, status_code=200)
 
 
 @app.get("/radar.svg")
